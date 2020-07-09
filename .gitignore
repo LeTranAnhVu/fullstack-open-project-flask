@@ -1,0 +1,5 @@
+venv
+/main/resources
+/migrations
+/main/config/__init__.py
+__pycache__/
