@@ -21,8 +21,11 @@ migrate = Migrate(app, db)
 # manager = Manager(app)
 # manager.add_command('db', MigrateCommand)
 
+from main.models.RestaurantAndTag import RestaurantTag
 from main.models.ImageAndRestaurant import ImageRestaurant
 from main.models.Restaurant import Restaurant
 from main.models.Image import Image
+from main.models.Tag import Tag
+
 
 import main.routes

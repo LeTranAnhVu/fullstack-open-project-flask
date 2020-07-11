@@ -25,3 +25,6 @@ class ImageRestaurant(TimestampMixin, JsonMixin, db.Model):
     @property
     def image(self):
         return self.__image.to_json()
+    @image.setter
+    def image(self, image):
+        self.__image = image

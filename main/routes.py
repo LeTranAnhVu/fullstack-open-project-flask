@@ -1,7 +1,7 @@
 import os
 from flask import jsonify, json, make_response, abort, request, send_from_directory
 from werkzeug.exceptions import HTTPException, NotFound
-from main import app, db, Restaurant, Image, ImageRestaurant
+from main import app, db, Restaurant, Image, ImageRestaurant, Tag
 from main.helpers.type2type import str2bool
 from main.helpers.common import without_keys
 
@@ -43,6 +43,28 @@ def seed_restaurants():
             return make_response({'message': 'seed fail', 'info': str(e)}, 500)
 
 
+@app.route('/seed/tags')
+def seed_tags():
+    try:
+        with open(os.path.join(app.root_path, '../json/restaurants.json')) as file:
+            restaurants = json.load(file)['restaurants']
+            for res in restaurants:
+                restaurant = Restaurant.query.filter_by(
+                    blurhash=res.get('blurhash')).first()
+                tags = res.get('tags', None)
+                if tags and restaurant:
+                    for t in tags:
+                        tag = Tag.query.filter_by(name=t).first()
+                        if not tag:
+                            tag = Tag(name=t)
+                            db.session.add(tag)
+                        restaurant.append_tag(tag)
+
+                    db.session.commit()
+            return jsonify({'data': 'seed success'})
+
+    except Exception as e:
+        abort(500, e)
 # CURD restaurants
 @app.route('/restaurants', methods=['GET', 'POST'])
 def restaurants():
@@ -103,14 +125,21 @@ def restaurants():
     if request.method == 'POST':
         try:
             data = request.get_json()
-            # without images
-            insert_data = without_keys(data, 'images')
+            # without keys
+            insert_data = without_keys(data, 'images', 'tags')
             restaurant = Restaurant(**insert_data)
+
+            for tag_id in data.get('tags', []):
+                tag = Tag.query.filter_by(id=tag_id).first()
+                if tag:
+                    restaurant.append_tag(tag)
+                else: pass
             for index, image_id in enumerate(data['images']):
                 image = Image.query.filter_by(id=image_id).first()
                 if image:
-                    image_restaurant = ImageRestaurant(is_main =(index == 0), image=image)
-                    restaurant.images.append(image_restaurant)
+                    image_restaurant = ImageRestaurant(
+                        is_main=(index == 0), image=image)
+                    restaurant.append_image(image_restaurant)
 
             db.session.add(restaurant)
             db.session.commit()
@@ -131,11 +160,22 @@ def restaurant(id):
     if request.method == 'PATCH':
         try:
             query = Restaurant.query.filter_by(id=id)
-            update_data = request.get_json()
-            if update_data:
-                query.update(update_data)
-                restaurant = query.first_or_404()
-                restaurant.updated_at = datetime.datetime.utcnow()
+            data = request.get_json()
+            insert_data = without_keys(data, 'images', 'tags')
+            restaurant = query.first_or_404()
+            if insert_data or data.get('tags', []) or data.get('images', []):
+                if insert_data:
+                    query.update(insert_data)
+                for tag_id in data.get('tags', []):
+                    tag = Tag.query.filter_by(id=tag_id).first()
+                    if tag:
+                        restaurant.append_tag(tag)
+                    else: pass
+                for index, image_id in enumerate(data.get('images', [])):
+                    image = Image.query.filter_by(id=image_id).first()
+                    if image:
+                        image_restaurant = ImageRestaurant(image=image)
+                        restaurant.append_image(image_restaurant)
                 db.session.commit()
                 return {'message': 'Updated successfully'}, 200
             return {'message': 'Not thing to update'}, 200
@@ -153,6 +193,89 @@ def restaurant(id):
         except NoResultFound as e:
             abort(404, e)
 
+# CRUD tags
+@app.route('/tags', methods=['GET', 'POST'])
+def tags():
+    if request.method == 'GET':
+        res_json = {
+            'data': [],
+            'total': None,
+            'pages': None,
+            'current_page': None,
+            'next_page': None,
+            'prev_page': None
+        }
+        try:
+            keyword = "" if request.args.get(
+                'keyword') is None else request.args.get('keyword')
+            per_page = URL_CONFIG.PER_PAGE if request.args.get(
+                'per_page') is None else int(request.args.get('per_page'))
+            page = URL_CONFIG.INIT_PAGE if request.args.get(
+                'page') is None else int(request.args.get('page'))
+            # query
+            q = Tag.query
+
+            # search
+            search_str = f'%{keyword}%'
+            q = q.filter(Tag.name.like(search_str))
+
+            # order
+            q = q.order_by(Tag.id.asc())
+
+            # pagination
+            pagination = q.paginate(
+                per_page=per_page, page=page)
+
+            data = []
+            for tag in pagination.items:
+                data.append(tag.to_json())
+            res_json['data'] = data
+            res_json['total'] = pagination.total
+            res_json['pages'] = pagination.pages
+            res_json['current_page'] = pagination.page
+            res_json['next_page'] = pagination.next_num if pagination.has_next is True else None
+            res_json['prev_page'] = pagination.prev_num if pagination.has_prev is True else None
+
+            return jsonify(res_json), 200
+        except NotFound as e:
+            return jsonify(res_json), 200
+        except Exception as e:
+            return abort(500, e)
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            name = data.get('name', None)
+            if name is None:
+                return abort(400)
+            tag = Tag(name=name)
+            db.session.add(tag)
+            db.session.commit()
+            return {'message': 'Created successfully'}, 200
+        except Exception as e:
+            abort(400, e)
+
+@app.route('/tags/<int:id>', methods=['GET', 'PATCH', 'DELETE'])
+def tag(id):
+    tag = Tag.query.filter_by(id=id).first_or_404()
+    try:
+        if request.method == 'GET':
+            return {'data': tag.to_json()}
+        if request.method == 'PATCH':
+            data = request.get_json()
+            name = data.get('name', "")
+            if name and name != "" and tag.name != name:
+                tag.name = name
+                db.session.commit()
+                return {'data': tag.to_json()}, 200
+            else:
+                return {'message': 'not thing to update'}, 200
+        if request.method == 'DELETE':
+            db.session.delete(tag)
+            db.session.commit()
+            return {'message': 'Deleted successfully'}, 200
+            
+    except Exception as e:
+        abort(500)
 
 # CRUD files
 @app.route(f'/{RESOURCE_CONFIG.PUBLIC_URL}/<string:resource_type>/<string:resource_name>')
