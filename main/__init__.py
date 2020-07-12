@@ -3,9 +3,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate, MigrateCommand
 from main.config import RESOURCE_CONFIG
+from flask_cors import CORS
 # from flask_script import Manager
 
 app = Flask(__name__)
+
+CORS(app)
 
 # connect to database
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root@localhost/food_delivery"

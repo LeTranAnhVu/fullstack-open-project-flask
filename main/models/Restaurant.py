@@ -17,7 +17,6 @@ class Restaurant(TimestampMixin, JsonMixin, db.Model):
     __tags = db.relationship('Tag', secondary=RestaurantTag.__table__, lazy='dynamic', backref=db.backref('restaurants', lazy=True)) 
     name = db.Column('name', db.String(300))
     online = db.Column('online', db.Boolean)
-    blurhash = db.Column('blurhash', db.String(200))
 
     public_keys = [
         "id",
@@ -29,7 +28,6 @@ class Restaurant(TimestampMixin, JsonMixin, db.Model):
         "tags",
         "name",
         "online",
-        "blurhash",
         "created_at",
         "updated_at"
     ]

@@ -6,7 +6,6 @@ from main.models import TimestampMixin, JsonMixin
 from main import app
 from main.config import RESOURCE_CONFIG
 
-
 class Image(TimestampMixin, JsonMixin, db.Model):
     __tablename__ = 'images'
     id = db.Column('id', db.Integer, primary_key=True)
@@ -25,4 +24,7 @@ class Image(TimestampMixin, JsonMixin, db.Model):
 
     @property
     def url(self):
-        return app.config["SERVER_NAME"] + self.__url
+        return 'http://' + app.config["SERVER_NAME"] + '/api/' +self.__url
+    @url.setter
+    def url(self, value):
+        self.__url = value

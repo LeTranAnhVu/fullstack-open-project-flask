@@ -7,4 +7,4 @@ class TimestampMixin(object):
 
 class JsonMixin():
     def to_json(self):
-        return { key: getattr(self, key) for key in self.public_keys}
+        return { key: getattr(self, key, None) for key in self.public_keys}
