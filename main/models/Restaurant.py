@@ -13,8 +13,8 @@ class Restaurant(TimestampMixin, JsonMixin, db.Model):
     currency = db.Column('currency', db.String(5))
     delivery_price = db.Column('delivery_price', db.Float)
     description = db.Column('description', db.String(500))
-    __images = db.relationship('ImageRestaurant')
-    __tags = db.relationship('Tag', secondary=RestaurantTag.__table__, lazy='dynamic', backref=db.backref('restaurants', lazy=True)) 
+    __images = db.relationship('ImageRestaurant', lazy='joined')
+    __tags = db.relationship('Tag', secondary=RestaurantTag.__table__, lazy='joined', backref=db.backref('restaurants', lazy=True)) 
     name = db.Column('name', db.String(300))
     online = db.Column('online', db.Boolean)
 

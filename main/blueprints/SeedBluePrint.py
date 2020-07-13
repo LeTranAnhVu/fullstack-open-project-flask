@@ -1,15 +1,8 @@
 import os
-from flask import Blueprint, jsonify, json, make_response, abort, request
-from werkzeug.exceptions import NotFound
-from main import app, db, Restaurant, ImageRestaurant, Tag, Image
-from main.helpers.type2type import str2bool
-from main.helpers.common import without_keys
+from flask import Blueprint, jsonify, json, abort, request
+from main import app, db, Restaurant, Tag, User, bcrypt
 
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import or_, and_, not_
 import datetime
-from main.config import URL_CONFIG, RESOURCE_CONFIG
 
 
 blueprint = Blueprint('seed', __name__)
@@ -30,9 +23,9 @@ def seed_restaurants():
                 db.session.add(res_model)
 
             db.session.commit()
-            return make_response({'message': 'seed success'}, 200)
+            return jsonify({'message': 'seed success'}), 200
         except Exception as e:
-            return make_response({'message': 'seed fail', 'info': str(e)}, 500)
+            return jsonify({'message': 'seed fail', 'info': str(e)}), 500
 
 @blueprint.route('/tags')
 def seed_tags():
@@ -41,7 +34,7 @@ def seed_tags():
             restaurants = json.load(file)['restaurants']
             for res in restaurants:
                 restaurant = Restaurant.query.filter_by(
-                    blurhash=res.get('blurhash')).first()
+                    name=res.get('name', None)).first()
                 tags = res.get('tags', None)
                 if tags and restaurant:
                     for t in tags:
@@ -53,5 +46,16 @@ def seed_tags():
                     db.session.commit()
             return jsonify({'data': 'seed success'})
 
+    except Exception as e:
+        abort(500, e)
+
+
+@blueprint.route('/users')
+def seed_users():
+    try:
+        user = User(username='letrananhvu', password='admin')
+        db.session.add(user)
+        db.session.commit()
+        return {'message': 'seed success'}
     except Exception as e:
         abort(500, e)

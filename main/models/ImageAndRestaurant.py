@@ -12,8 +12,8 @@ class ImageRestaurant(TimestampMixin, JsonMixin, db.Model):
     restaurant_id = db.Column(
         'restaurant_id', db.Integer, db.ForeignKey('restaurants.id'))
 
-    __image = db.relationship('Image')
-    restaurant = db.relationship('Restaurant')
+    __image = db.relationship('Image', lazy='joined')
+    restaurant = db.relationship('Restaurant', lazy='joined')
     is_main = db.Column('is_main', db.Boolean, default=False)
 
     public_keys=[
