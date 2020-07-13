@@ -6,7 +6,11 @@ from main.blueprints.FileBluePrint import blueprint as file_blueprint
 from main.blueprints.ErrorBluePrint import blueprint as error_blueprint
 from main.blueprints.SeedBluePrint import blueprint as seed_blueprint
 from main.blueprints.OrderBluePrint import blueprint as order_blueprint
+from main.blueprints.AuthBluePrint import blueprint as auth_blueprint
 
+#auth
+
+app.register_blueprint(auth_blueprint, url_prefix='/api/auth')
 # seed api
 app.register_blueprint(seed_blueprint, url_prefix='/api/seed')
 

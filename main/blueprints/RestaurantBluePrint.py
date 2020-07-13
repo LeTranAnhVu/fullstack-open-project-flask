@@ -4,7 +4,7 @@ from werkzeug.exceptions import NotFound
 from main import app, db, Restaurant, ImageRestaurant, Tag, Image
 from main.helpers.type2type import str2bool
 from main.helpers.common import without_keys
-
+from main.blueprints.AuthBluePrint import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import or_, and_, not_
@@ -15,6 +15,7 @@ blueprint = Blueprint('restaurant', __name__)
 
 # CURD restaurants
 @blueprint.route('', methods=['GET', 'POST'])
+@login_required
 def restaurants():
     if request.method == 'GET':
         res_json = {

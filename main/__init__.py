@@ -5,6 +5,7 @@ from flask_migrate import Migrate, MigrateCommand
 from main.config import RESOURCE_CONFIG
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
+import jwt
 # from flask_script import Manager
 
 app = Flask(__name__)
@@ -12,6 +13,7 @@ CORS(app)
 bcrypt = Bcrypt(app)
 
 # connect to database
+app.config["SALT"] = "secret_key"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root@localhost/food_delivery"
 app.config["SQLALCHEMY_ECHO"] = True
 app.config["UPLOAD_FOLDER"] = os.path.join(app.root_path, RESOURCE_CONFIG.UPLOAD_FOLDER)

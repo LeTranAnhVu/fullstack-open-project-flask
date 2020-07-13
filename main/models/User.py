@@ -17,7 +17,7 @@ class User(TimestampMixin, JsonMixin, db.Model):
         self.username = username
         self.password = bcrypt.generate_password_hash(password)
 
-    def check_password(self, password):
+    def verify_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
     
     
