@@ -19,3 +19,4 @@ class JsonMixin():
             elif not isinstance(data, db.Model):
                 d[key]= data
         return d
+

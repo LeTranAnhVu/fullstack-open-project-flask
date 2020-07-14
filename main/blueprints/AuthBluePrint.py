@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, g
 
 from main import jwt, app, User, db
 from sqlalchemy import or_, and_, not_
@@ -52,6 +52,9 @@ def check_is_login(message = None):
         user = User.query.filter_by(id=user_id, username=username).first()
         if user is None:
             return fail_message, 400
+        
+        # store in global context
+        g.user = user
         return {'user': user.to_json(except_keys=['orders'])} ,200
     except Exception as e:
         return fail_message, 500
@@ -60,7 +63,6 @@ def check_is_login(message = None):
 def login_required(only=[]):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            print('++++++++++++++', request.method)
             if len(only) == 0 or request.method in only:
                 result = check_is_login("need login")
                 if 200 in result: 

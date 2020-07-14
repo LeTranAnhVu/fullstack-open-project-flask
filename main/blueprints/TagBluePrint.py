@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, abort, request
 from main import app, db,Tag
 from main.helpers.type2type import str2bool
 from main.helpers.common import without_keys
-
+from main.helpers.pagination import MakePaginate
 import datetime
 from main.config import URL_CONFIG, RESOURCE_CONFIG
 
@@ -14,14 +14,7 @@ blueprint = Blueprint('tag', __name__)
 @blueprint.route('', methods=['GET', 'POST'])
 def tags():
     if request.method == 'GET':
-        res_json = {
-            'data': [],
-            'total': None,
-            'pages': None,
-            'current_page': None,
-            'next_page': None,
-            'prev_page': None
-        }
+        make_paginate = MakePaginate()
         try:
             keyword = "" if request.args.get(
                 'keyword') is None else request.args.get('keyword')
@@ -43,19 +36,10 @@ def tags():
             pagination = q.paginate(
                 per_page=per_page, page=page)
 
-            data = []
-            for tag in pagination.items:
-                data.append(tag.to_json())
-            res_json['data'] = data
-            res_json['total'] = pagination.total
-            res_json['pages'] = pagination.pages
-            res_json['current_page'] = pagination.page
-            res_json['next_page'] = pagination.next_num if pagination.has_next is True else None
-            res_json['prev_page'] = pagination.prev_num if pagination.has_prev is True else None
-
-            return jsonify(res_json), 200
+            make_paginate.paginate(pagination)
+            return jsonify(make_paginate.response), 200
         except NotFound as e:
-            return jsonify(res_json), 200
+            return jsonify(make_paginate.response), 200
         except Exception as e:
             return abort(500, e)
     if request.method == 'POST':

@@ -8,6 +8,7 @@ from main.blueprints.AuthBluePrint import login_required
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import or_, and_, not_
+from main.helpers.pagination import MakePaginate
 import datetime
 from main.config import URL_CONFIG, RESOURCE_CONFIG
 
@@ -16,17 +17,9 @@ blueprint = Blueprint('restaurant', __name__)
 # CURD restaurants
 
 @blueprint.route('', methods=['GET', 'POST'])
-@login_required(only=['POST'])
 def restaurants():
     if request.method == 'GET':
-        res_json = {
-            'data': [],
-            'total': None,
-            'pages': None,
-            'current_page': None,
-            'next_page': None,
-            'prev_page': None
-        }
+        make_paginate = MakePaginate()
         try:
             keyword = "" if request.args.get(
                 'keyword') is None else request.args.get('keyword')
@@ -55,19 +48,11 @@ def restaurants():
             pagination = q.paginate(
                 per_page=per_page, page=page)
 
-            data = []
-            for restaurant in pagination.items:
-                data.append(restaurant.to_json())
-            res_json['data'] = data
-            res_json['total'] = pagination.total
-            res_json['pages'] = pagination.pages
-            res_json['current_page'] = pagination.page
-            res_json['next_page'] = pagination.next_num if pagination.has_next is True else None
-            res_json['prev_page'] = pagination.prev_num if pagination.has_prev is True else None
+            make_paginate.paginate(pagination)
 
-            return jsonify(res_json), 200
+            return jsonify(make_paginate.response), 200
         except NotFound as e:
-            return jsonify(res_json), 200
+            return jsonify(make_paginate.response), 200
         except Exception as e:
             return abort(500, e)
 

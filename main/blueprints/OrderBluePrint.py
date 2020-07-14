@@ -1,5 +1,5 @@
 
-from flask import Blueprint, request, abort
+from flask import Blueprint, request, abort, g
 from main import db
 from main import Order, User, Restaurant
 from main.helpers.common import without_keys
@@ -12,22 +12,20 @@ blueprint = Blueprint('order', __name__)
 
 
 @blueprint.route('', methods=['GET', 'POST'])
+@login_required()
 def orders():
     if request.method == 'GET':
         return {'data': []}, 200
     if request.method == 'POST':
         try:
-            print('-----------------------------')
-            keys = ['user_id', 'item_id', 'amount', 'note', 'order_place']
+            keys = ['item_id', 'amount', 'note', 'order_place']
             data = request.get_json()
-            order = Order(**without_keys(data, 'user_id', 'item_id'))
-            print('-----------------------------')
+            order = Order(**without_keys(data, 'item_id'))
             
             today_str = str(datetime.date.today().isoformat())
-            print('-----------------------------')
 
+            current_user = g.get('user', None)
             order.code = f'{today_str}/{SmallUUID()}'
-            current_user = User.query.filter_by(id=data.get('user_id', None)).first_or_404()
             item = Restaurant.query.filter_by(id=data.get('item_id', None)).first_or_404()
             # associate
             order.item = item

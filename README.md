@@ -9,3 +9,4 @@
 |12.7 + 13.7| 11 | optimize query with joined, migrate user table & order, make order api, refactor tojson function for models |
 |13.7| 8 | research authentication with jwt in flask, appy it, make decorator for checkLogin |
 |14.7| 5 | apply jwt exprired, testing api, add logic for login_require, choose method to guard the api |
+|| 3 | Refactor pagination|

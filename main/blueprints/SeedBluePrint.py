@@ -53,7 +53,7 @@ def seed_tags():
 @blueprint.route('/users')
 def seed_users():
     try:
-        user = User(username='letrananhvu', password='admin')
+        user = User(username='admin', password='admin')
         db.session.add(user)
         db.session.commit()
         return {'message': 'seed success'}
