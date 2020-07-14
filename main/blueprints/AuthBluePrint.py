@@ -5,7 +5,30 @@ from sqlalchemy import or_, and_, not_
 import datetime
 blueprint = Blueprint('auth', __name__)
 
-def _is_login(message = None):
+def _gen_token(payload={}, minutes=60):
+    now = datetime.datetime.utcnow()
+    expired_at = now + datetime.timedelta(minutes=minutes)
+    expired_at = expired_at.strftime(app.config['DATETIME_FORMAT'])
+
+    token = jwt.encode({**payload, 'expired_at': expired_at}, app.config['SALT']).decode('utf-8')
+    return token
+
+def _check_available_token(token):
+    payload = jwt.decode(token, app.config['SALT'])
+    expired_at = payload.get('expired_at', None)
+    if not expired_at: 
+        return None
+    expired_at = datetime.datetime.strptime(expired_at, app.config['DATETIME_FORMAT'])
+
+    now = datetime.datetime.utcnow()
+
+    if now >= expired_at : # out of date
+        return None
+
+    # token till available
+    return payload
+
+def check_is_login(message = None):
     fail_message = {'message': message if message else 'token invalid'}
     try:
         bearer = request.headers.get('token', None)
@@ -14,7 +37,11 @@ def _is_login(message = None):
         
         token = bearer.split('Bearer ')[1]
 
-        payload = jwt.decode(token, app.config['SALT'])
+        payload = _check_available_token(token)
+
+        if payload is None:
+            return fail_message, 400
+            
         username = payload.get('username', None)
         user_id = payload.get('id', None)
 
@@ -30,14 +57,20 @@ def _is_login(message = None):
         return fail_message, 500
 
 
-def login_required(func):
-    def wrapper(*args, **kwargs):
-        result = _is_login("need login")
-        if 200 in result: 
-            return func(*args, **kwargs)
-        else: 
-            return result
-    return wrapper
+def login_required(only=[]):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            print('++++++++++++++', request.method)
+            if len(only) == 0 or request.method in only:
+                result = check_is_login("need login")
+                if 200 in result: 
+                    return func(*args, **kwargs)
+                else: 
+                    return result
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return decorator
 
 
 @blueprint.route('/login', methods=['POST'])
@@ -57,7 +90,7 @@ def login():
 
         # generate token
         payload = {'username': user.username, 'id': user.id}
-        token = jwt.encode(payload, app.config['SALT']).decode('utf-8')
+        token = _gen_token(payload=payload)
 
         # update user
         user.logined_at = datetime.datetime.utcnow()
@@ -69,4 +102,4 @@ def login():
 
 @blueprint.route('/is_login')
 def is_login():
-    return _is_login()
+    return check_is_login()

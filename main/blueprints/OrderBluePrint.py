@@ -3,11 +3,13 @@ from flask import Blueprint, request, abort
 from main import db
 from main import Order, User, Restaurant
 from main.helpers.common import without_keys
+from main.blueprints.AuthBluePrint import login_required
 from smalluuid import SmallUUID
 import datetime
 
 
 blueprint = Blueprint('order', __name__)
+
 
 @blueprint.route('', methods=['GET', 'POST'])
 def orders():

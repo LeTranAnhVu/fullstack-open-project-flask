@@ -14,8 +14,9 @@ from main.config import URL_CONFIG, RESOURCE_CONFIG
 blueprint = Blueprint('restaurant', __name__)
 
 # CURD restaurants
+
 @blueprint.route('', methods=['GET', 'POST'])
-@login_required
+@login_required(only=['POST'])
 def restaurants():
     if request.method == 'GET':
         res_json = {
