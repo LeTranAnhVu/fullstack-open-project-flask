@@ -31,11 +31,18 @@ migrate = Migrate(app, db)
 
 from main.models.RestaurantAndTag import RestaurantTag
 from main.models.ImageAndRestaurant import ImageRestaurant
+from main.models.AdminAndRole import AdminRole
+from main.models.PermissionAndRole import PermissionRole
+
 from main.models.Restaurant import Restaurant
 from main.models.Image import Image
 from main.models.Tag import Tag
 from main.models.User import User
 from main.models.Order import Order
+from main.models.Admin import Admin
+from main.models.Role import Role
+from main.models.Permission import Permission
+
 
 
 import main.routes
