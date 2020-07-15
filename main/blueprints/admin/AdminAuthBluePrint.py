@@ -1,12 +1,13 @@
 from flask import Blueprint, request, abort, g
 
-from main import jwt, app, User, db
+from main import jwt, app, Admin, db
 from main.helpers.token import gen_token, check_available_token
 from sqlalchemy import or_, and_, not_
 import datetime
-blueprint = Blueprint('auth', __name__)
+blueprint = Blueprint('admin_auth', __name__)
 
-def check_is_login(message = None):
+
+def check_admin_is_login(message = None):
     fail_message = {'message': message if message else 'token invalid'}
     try:
         bearer = request.headers.get('token', None)
@@ -21,28 +22,28 @@ def check_is_login(message = None):
             return fail_message, 400
             
         username = payload.get('username', None)
-        user_id = payload.get('id', None)
+        admin_id = payload.get('id', None)
 
         if not username and not user_id:
             return fail_message, 400
 
-        # get user
-        user = User.query.filter_by(id=user_id, username=username).first()
-        if user is None:
+        # get admin
+        admin = Admin.query.filter_by(id=admin_id, username=username).first()
+        if admin is None:
             return fail_message, 400
         
         # store in global context
-        g.user = user
-        return {'user': user.to_json(except_keys=['orders'])} ,200
+        g.admin = admin
+        return {'admin': admin.to_json(except_keys=[])} ,200
     except Exception as e:
         return fail_message, 500
 
 
-def login_required(only=[]):
+def admin_login_required(only=[]):
     def decorator(func):
         def wrapper(*args, **kwargs):
             if len(only) == 0 or request.method in only:
-                result = check_is_login("need login")
+                result = check_admin_is_login("admin need login")
                 if 200 in result: 
                     return func(*args, **kwargs)
                 else: 
@@ -63,23 +64,22 @@ def login():
         if not username or not password:
             return fail_message, 400
 
-        user = User.query.filter_by(username=username).first()
-        # check user & verify password
-        if user is None or not user.verify_password(password):
+        admin = Admin.query.filter_by(username=username).first()
+        # check admin & verify password
+        if admin is None or not admin.verify_password(password):
             return fail_message, 400
 
         # generate token
-        payload = {'username': user.username, 'id': user.id}
+        payload = {'username': admin.username, 'id': admin.id}
         token = gen_token(payload=payload)
 
-        # update user
-        user.logined_at = datetime.datetime.utcnow()
+        # update admin
+        admin.logined_at = datetime.datetime.utcnow()
         db.session.commit()
-        return {'user': {**(user.to_json(except_keys=['orders'])), 'token': token}}, 200
+        return {'user': {**(admin.to_json(except_keys=['orders'])), 'token': token}}, 200
     except Exception as e:
         abort(500, e)
 
-
 @blueprint.route('/is_login')
 def is_login():
-    return check_is_login()
+    return check_admin_is_login()

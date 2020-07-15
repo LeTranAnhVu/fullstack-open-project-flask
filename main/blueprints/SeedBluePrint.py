@@ -65,9 +65,10 @@ def seed_users():
 @blueprint.route('/admins')
 def seed_admins():
     try:
-        ad1 = Admin(username='admin1', password='admin')
-        ad2 = Admin(username='admin2', password='admin')
-        ad3 = Admin(username='admin3', password='admin')
+        now = datetime.datetime.utcnow()
+        ad1 = Admin(username='admin1', password='admin', is_active=True, actived_at=now)
+        ad2 = Admin(username='admin2', password='admin', is_active=True, actived_at=now)
+        ad3 = Admin(username='admin3', password='admin', is_active=True, actived_at=now)
         db.session.add(ad1)
         db.session.add(ad2)
         db.session.add(ad3)
@@ -117,8 +118,8 @@ def seed_permission_role():
             Permission.name.like("%:all%")).all()
         partners = Role.query.filter_by(name="restaurant_partner").all()
         partner_pers = ['read,create,edit:restaurant',
-            'read:user', 'create:image', 'read,edit:order']
-        
+                        'read:user', 'create:image', 'read,edit:order']
+
         for sadmin in super_admins:
             for per in all_permissions:
                 sadmin.permissions.append(per)
@@ -128,8 +129,28 @@ def seed_permission_role():
                 entity = per.split(':')[-1]
                 actions = per.split(':')[0].split(',')
                 for action in actions:
-                    per = Permission.query.filter_by(name=f'{entity}:{action}').first_or_404()
+                    per = Permission.query.filter_by(
+                        name=f'{entity}:{action}').first_or_404()
                     partner.permissions.append(per)
+        db.session.commit()
+        return {'message': 'seed success'}
+    except Exception as e:
+        abort(500, e)
+
+
+@blueprint.route('/admin_role')
+def seed_admin_role():
+    try:
+        admin1 = Admin.query.filter_by(id=1).first()
+        admin2 = Admin.query.filter_by(id=2).first()
+        admin3 = Admin.query.filter_by(id=3).first()
+        supe = Role.query.filter_by(name='super_admin').first()
+        partner = Role.query.filter_by(name='restaurant_partner').first()
+
+        admin1.roles.append(supe)
+        admin2.roles.append(partner)
+        admin3.roles.append(partner)
+
         db.session.commit()
         return {'message': 'seed success'}
     except Exception as e:

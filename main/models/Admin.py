@@ -9,8 +9,11 @@ class Admin(TimestampMixin, JsonMixin, db.Model):
                          nullable=False, unique=True)
     password = db.Column('password', db.Text, nullable=False)
     logined_at = db.Column('logined_at', db.DateTime)
+    is_active = db.Column('is_active', db.Boolean, default=False)
+    actived_at = db.Column('actived_at', db.DateTime)
 
-    public_keys= ['id', 'username', 'logined_at', 'created_at', 'updated_at']
+    public_keys = ['id', 'username', 'logined_at', 'created_at', 'updated_at', 'roles']
+    fillable_keys = ['username', 'logined_at', 'password', 'created_at', 'updated_at']
 
     def __init__(self, username, password):
         self.username = username

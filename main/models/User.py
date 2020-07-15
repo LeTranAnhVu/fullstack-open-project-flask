@@ -9,8 +9,8 @@ class User(TimestampMixin, JsonMixin, db.Model):
                          nullable=False, unique=True)
     password = db.Column('password', db.Text, nullable=False)
     logined_at = db.Column('logined_at', db.DateTime)
+    
 
-   
     public_keys= ['id', 'username', 'logined_at', 'created_at', 'updated_at', 'orders']
 
     def __init__(self, username, password):
@@ -19,5 +19,4 @@ class User(TimestampMixin, JsonMixin, db.Model):
 
     def verify_password(self, password):
         return bcrypt.check_password_hash(self.password, password)
-    
     

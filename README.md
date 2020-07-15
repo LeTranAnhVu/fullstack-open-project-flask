@@ -11,3 +11,4 @@
 |14.7| 5 | apply jwt exprired, testing api, add logic for login_require, choose method to guard the api |
 || 3 | Refactor pagination|
 |15.7| 6 | add User, Admin, permission Role|
+|| 6 | add basic permission role|

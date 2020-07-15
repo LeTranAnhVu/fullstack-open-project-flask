@@ -7,10 +7,11 @@ class TimestampMixin(object):
     updated_at = db.Column(db.DateTime, onupdate=datetime.datetime.utcnow)
 
 class JsonMixin():
-    def to_json(self, except_keys=[], parent_models=set()):
+    def to_json(self, except_keys=[], parent_models=set(), extra_keys=[]):
         d = dict()
         parent_models.add(self.__class__)
-        for key in without_items(self.public_keys, except_keys):
+        keys = list({*extra_keys, *self.public_keys})
+        for key in without_items(keys, except_keys):
             data = getattr(self, key, None)
             if isinstance(data, db.Model) and data.__class__ not in parent_models :
                 d[key] = data.to_json(parent_models=parent_models.copy())

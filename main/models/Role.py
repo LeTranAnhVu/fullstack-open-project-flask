@@ -11,4 +11,5 @@ class Role(TimestampMixin, JsonMixin, db.Model):
     admins = db.relationship('Admin', secondary=AdminRole.__table__, backref=db.backref('roles', lazy='joined'), lazy='dynamic')
     permissions = db.relationship('Permission', secondary=PermissionRole.__table__, backref=db.backref('roles'), lazy='joined')
 
+    fillable_keys = ['name', 'display_name']
     public_keys=['id', 'name', 'display_name']
