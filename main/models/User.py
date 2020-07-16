@@ -9,11 +9,12 @@ class User(TimestampMixin, JsonMixin, db.Model):
                          nullable=False, unique=True)
     password = db.Column('password', db.Text, nullable=False)
     logined_at = db.Column('logined_at', db.DateTime)
-    
+    order_places = db.Column('order_places', db.JSON)
 
-    public_keys= ['id', 'username', 'logined_at', 'created_at', 'updated_at', 'orders']
+    fillable_keys = ['username', 'password', 'logined_at', 'created_at', 'updated_at']
+    public_keys= ['id', 'username', 'logined_at', 'created_at', 'updated_at']
 
-    def __init__(self, username, password):
+    def __init__(self, username, password, **kwargs):
         self.username = username
         self.password = bcrypt.generate_password_hash(password)
 

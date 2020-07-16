@@ -2,6 +2,8 @@ from flask import Blueprint, request, abort, g
 
 from main import jwt, app, User, db
 from main.helpers.token import gen_token, check_available_token
+from main.helpers.common import only_keys
+from main.validators.UserValidators import register_validator
 from sqlalchemy import or_, and_, not_
 import datetime
 blueprint = Blueprint('auth', __name__)
@@ -37,7 +39,7 @@ def check_is_login(message = None):
     except Exception as e:
         return fail_message, 500
 
-
+# decorator
 def login_required(only=[]):
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -83,3 +85,17 @@ def login():
 @blueprint.route('/is_login')
 def is_login():
     return check_is_login()
+
+
+@blueprint.route('/register', methods=['POST'])
+@register_validator(only=['POST'])
+def register():
+    try: 
+        data = request.get_json()
+        insert_data = only_keys(data, 'username', 'password')
+        user = User(**insert_data)
+        db.session.add(user)
+        db.session.commit()
+        return {'user': user.to_json()}, 200
+    except Exception as e:
+        return {'message': str(e)}, 400

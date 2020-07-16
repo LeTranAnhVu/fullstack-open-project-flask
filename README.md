@@ -12,3 +12,4 @@
 || 3 | Refactor pagination|
 |15.7| 6 | add User, Admin, permission Role|
 || 6 | add basic permission role|
+|16.7| 8 | hand-pn build validator for flask|
