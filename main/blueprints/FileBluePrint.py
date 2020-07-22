@@ -5,11 +5,11 @@ from main.helpers.type2type import str2bool
 from main.helpers.upload_file import upload_file
 import blurhash as blurhash_maker
 
-
 import datetime
 from main.config import URL_CONFIG, RESOURCE_CONFIG
 
 blueprint = Blueprint('files', __name__)
+
 
 def image_handler(saved_filepaths):
     imageModels = []
@@ -23,8 +23,9 @@ def image_handler(saved_filepaths):
         db.session.add(imageModel)
         imageModels.append(imageModel)
     db.session.commit()
-    print([image.to_json() for image in imageModels])
+    # print([image.to_json() for image in imageModels])
     return {'data': [image.to_json() for image in imageModels]}, 201
+
 
 # CRUD files
 @blueprint.route(f'/{RESOURCE_CONFIG.PUBLIC_URL}/<string:resource_type>/<string:resource_name>')
@@ -33,6 +34,7 @@ def get_resource(resource_type, resource_name):
     if (resource_type not in allowed_resource):
         abort(400, {'message': 'Restricted resource'})
     return send_from_directory(app.config['UPLOAD_FOLDER'], f'{resource_type}/{resource_name}')
+
 
 @blueprint.route('/upload/<string:resource_type>', methods=['POST'])
 def saved_files(resource_type):

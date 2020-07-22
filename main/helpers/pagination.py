@@ -8,11 +8,10 @@ class MakePaginate():
             'next_page': None,
             'prev_page': None
         }
-        
-    
+
     def paginate(self, models):
         response = dict()
-        response['data'] = [item.to_json() for item in models.items ]
+        response['data'] = [item.to_json() for item in models.items]
         response['total'] = models.total
         response['pages'] = models.pages
         response['current_page'] = models.page

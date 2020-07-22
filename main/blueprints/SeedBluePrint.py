@@ -1,11 +1,47 @@
 import os
 from flask import Blueprint, jsonify, json, abort, request
-from main import app, db, Restaurant, Tag, User, bcrypt, Admin, Permission, Role
-
+from main import app, db, Restaurant, Tag, User, bcrypt, Admin, Permission, Role, ImageRestaurant, Image
+import urllib.request
+from PIL import Image as ImageUtil
+from main.helpers.upload_file import _make_fileurl
+import blurhash as blurhash_maker
 import datetime
 
-
 blueprint = Blueprint('seed', __name__)
+
+
+@blueprint.route('/image_for_restaurant')
+def seed_image():
+    with open(os.path.join(app.root_path, '../json/restaurants.json'), 'r') as file:
+        restaurants = json.load(file)['restaurants']
+        try:
+            for restaurant in restaurants:
+                restaurant_model = Restaurant.query.filter_by(name=restaurant.get('name')).first()
+                image_url = restaurant.get('image')
+                if restaurant_model and image_url:
+                    local_filename, headers = urllib.request.urlretrieve(image_url)
+                    with ImageUtil.open(local_filename) as image:
+                        # make img name and extension
+                        image_type = headers['Content-Type'].split('/')[-1]
+                        image_name = image_url.split('/')[-1] + '.' + image_type
+                        # save
+                        image.save(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name))
+                        # get image relative path
+                        image_link = _make_fileurl(image_name, 'images')
+                        print('image_link', image_link)
+                        hash = blurhash_maker.encode(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name),x_components=4, y_components=3)
+                        print('hash', hash)
+                        imageModel = Image(name=image_name, blurhash=hash, url=image_link)
+
+                        image_restaurant = ImageRestaurant(is_main=True, image=imageModel)
+                        restaurant_model.append_image(image_restaurant)
+
+            db.session.commit()
+            return jsonify({'message': 'seed success'}), 200
+        except Exception as e:
+            return jsonify({'message': 'seed fail', 'info': str(e)}), 500
+
+
 @blueprint.route('/restaurants')
 def seed_restaurants():
     with open(os.path.join(app.root_path, '../json/restaurants.json'), 'r') as file:
@@ -97,7 +133,7 @@ def seed_permissions():
     try:
         action_list = ['read', 'create', 'edit', 'delete', 'all']
         entity_list = ['admin', 'role', 'permission',
-                       'user', 'tag',  'restaurant', 'order', 'image']
+                       'user', 'tag', 'restaurant', 'order', 'image']
 
         for entity in entity_list:
             for action in action_list:

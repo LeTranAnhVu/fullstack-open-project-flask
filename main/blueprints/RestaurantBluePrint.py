@@ -14,6 +14,7 @@ from main.config import URL_CONFIG, RESOURCE_CONFIG
 
 blueprint = Blueprint('restaurant', __name__)
 
+
 # CURD restaurants
 
 @blueprint.route('', methods=['GET', 'POST'])
@@ -68,12 +69,12 @@ def restaurants():
                 tag = Tag.query.filter_by(id=tag_id).first()
                 if tag:
                     restaurant.append_tag(tag)
-                else: pass
+                else:
+                    pass
             for index, image_id in enumerate(data['images']):
                 image = Image.query.filter_by(id=image_id).first()
                 if image:
-                    image_restaurant = ImageRestaurant(
-                        is_main=(index == 0), image=image)
+                    image_restaurant = ImageRestaurant(is_main=(index == 0), image=image)
                     restaurant.append_image(image_restaurant)
 
             db.session.add(restaurant)
@@ -105,7 +106,8 @@ def restaurant(id):
                     tag = Tag.query.filter_by(id=tag_id).first()
                     if tag:
                         restaurant.append_tag(tag)
-                    else: pass
+                    else:
+                        pass
                 for index, image_id in enumerate(data.get('images', [])):
                     image = Image.query.filter_by(id=image_id).first()
                     if image:
