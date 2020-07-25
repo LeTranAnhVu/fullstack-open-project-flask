@@ -12,25 +12,25 @@ def check_admin_is_login(message = None):
     try:
         bearer = request.headers.get('token', None)
         if not bearer:
-            return fail_message, 400
+            return fail_message, 401
         
         token = bearer.split('Bearer ')[1]
 
         payload = check_available_token(token)
 
         if payload is None:
-            return fail_message, 400
+            return fail_message, 401
             
         username = payload.get('username', None)
         admin_id = payload.get('id', None)
 
-        if not username and not user_id:
-            return fail_message, 400
+        if not username and not admin_id:
+            return fail_message, 401
 
         # get admin
         admin = Admin.query.filter_by(id=admin_id, username=username).first()
         if admin is None:
-            return fail_message, 400
+            return fail_message, 401
         
         # store in global context
         g.admin = admin

@@ -15,3 +15,4 @@
 |16.7| 8 | hand-pn build validator for flask|
 |22.7| 6 | add seed image for restaurant in api |
 |23.7| 0.5 | add config |
+|25.7| 1 | fix api |

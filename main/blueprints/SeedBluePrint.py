@@ -19,6 +19,7 @@ def seed_image():
                 restaurant_model = Restaurant.query.filter_by(name=restaurant.get('name')).first()
                 image_url = restaurant.get('image')
                 if restaurant_model and image_url:
+                    print('restaurant', restaurant_model)
                     local_filename, headers = urllib.request.urlretrieve(image_url)
                     with ImageUtil.open(local_filename) as image:
                         # make img name and extension
@@ -26,13 +27,12 @@ def seed_image():
                         image_name = image_url.split('/')[-1] + '.' + image_type
                         # save
                         image.save(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name))
+
                         # get image relative path
                         image_link = _make_fileurl(image_name, 'images')
-                        print('image_link', image_link)
-                        hash = blurhash_maker.encode(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name),x_components=4, y_components=3)
-                        print('hash', hash)
+                        hash = blurhash_maker.encode(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name),
+                                                     x_components=4, y_components=3)
                         imageModel = Image(name=image_name, blurhash=hash, url=image_link)
-
                         image_restaurant = ImageRestaurant(is_main=True, image=imageModel)
                         restaurant_model.append_image(image_restaurant)
 
