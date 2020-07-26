@@ -3,3 +3,4 @@ venv
 /migrations
 /main/config/__init__.py
 __pycache__/
+.env

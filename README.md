@@ -1,5 +1,43 @@
 # Fullstack open project with Flask
 
+
+
+## Packages:
+* Flask==1.1.1
+* Flask-SQLAlchemy==2.4.1
+* Flask-Migrate==2.5.2
+* blurhash-python==1.0.1
+* PyMySQL==0.9.3
+  
+## SETUP VENV:
+* Install virtualenv:
+  * `pip/ pip3 install virtualenv` 
+* create venv:
+  * `virtualenv venv`
+* Access env:
+  * `source venv/bin/activate`
+* Deaccess env:
+  * (venv) `deactivate`
+* Export package:
+  * (venv) `pip freeze > requirement.txt`
+* Install exist packages:
+  * (venv) `pip install -r requirement.txt`
+## SETUP & CONFIG DATABASE:
+* Create `.env` from `.env.example`
+
+* Migrate database:
+  * `export FLASK_APP="run.py"`
+  * If `main/migrations` folder does not exist. Run `flask db init`
+  * To migrate: 
+    * `flask db migrate`
+  * To write change to database:
+    * `flask db upgrade`
+  * To drop change to database:
+    * `flask db downgrade`
+  
+## START SERVER:
+* `python run.py`
+
 ## Hours Keeping
 | Day | hours | work |
 |:----:|:-----|:-----|
@@ -17,3 +55,5 @@
 |23.7| 0.5 | add config |
 |25.7| 1 | fix api |
 |26.7| 9 | add user validator, create Order Get method, fix unstable bug due to mutable parameter in to_json()|
+|| 2 | setup env|
+
