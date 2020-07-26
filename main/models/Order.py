@@ -1,8 +1,8 @@
 from main import db
-from main.models import JsonMixin, TimestampMixin
+from main.models import Base
 
 
-class Order(JsonMixin, TimestampMixin, db.Model):
+class Order(Base):
     __tablename__ = 'orders'
     id = db.Column('id', db.Integer, primary_key=True)
     code = db.Column('code', db.String(100), nullable=False)

@@ -1,9 +1,9 @@
 from main import app, db
 import datetime
-from main.models import TimestampMixin, JsonMixin
+from main.models import Base
 
 
-class ImageRestaurant(TimestampMixin, JsonMixin, db.Model):
+class ImageRestaurant(Base):
     __tablename__ = 'image_restaurant'
     id = db.Column('id', db.Integer, primary_key=True)
     image_id = db.Column('image_id', db.Integer, db.ForeignKey('images.id'))

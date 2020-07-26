@@ -1,8 +1,8 @@
 from main import db, bcrypt
-from main.models import JsonMixin, TimestampMixin
+from main.models import Base
 
 
-class User(TimestampMixin, JsonMixin, db.Model):
+class User(Base):
     __tablename__ = 'users'
     id = db.Column('id', db.Integer, primary_key=True)
     username = db.Column('username', db.String(200),

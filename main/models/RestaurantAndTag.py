@@ -1,9 +1,9 @@
 
 
 from main import app, db
-from main.models import TimestampMixin, JsonMixin
+from main.models import Base
 
-class RestaurantTag(TimestampMixin, db.Model):
+class RestaurantTag(Base):
     __tablename__ = 'restaurant_tag'
     id = db.Column('id', db.Integer, primary_key=True)
     restaurant_id = db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurants.id'))

@@ -3,10 +3,10 @@ from main import db, app
 import blurhash
 import datetime
 from main import ImageRestaurant, RestaurantTag
-from main.models import TimestampMixin, JsonMixin
+from main.models import Base
 
 
-class Restaurant(TimestampMixin, JsonMixin, db.Model):
+class Restaurant(Base):
     __tablename__ = 'restaurants'
     id = db.Column('id', db.Integer, primary_key=True)
     city = db.Column('city', db.String(200))

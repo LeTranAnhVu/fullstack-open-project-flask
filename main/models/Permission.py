@@ -1,8 +1,8 @@
 from main import db
-from main.models import JsonMixin, TimestampMixin
+from main.models import Base
 
 
-class Permission(TimestampMixin, JsonMixin, db.Model):
+class Permission(Base):
     __tablename__ = 'permissions'
     id = db.Column('id', db.Integer, primary_key=True)
     name = db.Column('name', db.String(50), unique=True, nullable=False)

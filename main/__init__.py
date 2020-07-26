@@ -11,10 +11,10 @@ app = Flask(__name__)
 CORS(app)
 bcrypt = Bcrypt(app)
 
-from main.config import LOCAL_CONFIG, DEV_CONFIG
+from main.config import DEV_CONFIG as ENV_CONFIG
 # connect to database
 
-app.config.from_object(DEV_CONFIG)
+app.config.from_object(ENV_CONFIG)
 
 
 db = SQLAlchemy(app)

@@ -2,11 +2,11 @@
 from main import db
 import blurhash
 import datetime
-from main.models import TimestampMixin, JsonMixin
+from main.models import Base
 from main import app
 from main.config import RESOURCE_CONFIG
 
-class Image(TimestampMixin, JsonMixin, db.Model):
+class Image(Base):
     __tablename__ = 'images'
     id = db.Column('id', db.Integer, primary_key=True)
     __url = db.Column('url', db.Text)

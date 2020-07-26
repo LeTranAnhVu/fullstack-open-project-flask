@@ -1,14 +1,18 @@
-
 class Validator():
     def __init__(self, name):
         self.errors = []
         self.name = name
 
+    def _required(self, value):
+        if not value:
+            self.errors.append(f'{self.name} is required')
+        return self
+
     def _maxlen(self, value, max):
         if len(value) > max:
             self.errors.append(f'{self.name} is maximum {max} characters')
         return self
-    
+
     def _minlen(self, value, min):
         if len(value) < min:
             self.errors.append(f'{self.name} is minimum {min} characters')

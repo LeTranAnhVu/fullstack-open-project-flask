@@ -3,25 +3,27 @@ from flask import Blueprint, request, abort, g
 from main import jwt, app, User, db
 from main.helpers.token import gen_token, check_available_token
 from main.helpers.common import only_keys
-from main.validators.UserValidators import register_validator
+from main.validators.UserValidators import register_validator, register_username_validator
 from sqlalchemy import or_, and_, not_
 import datetime
+
 blueprint = Blueprint('auth', __name__)
 
-def check_is_login(message = None):
+
+def check_is_login(message=None):
     fail_message = {'message': message if message else 'token invalid'}
     try:
         bearer = request.headers.get('token', None)
         if not bearer:
             return fail_message, 401
-        
+
         token = bearer.split('Bearer ')[1]
 
         payload = check_available_token(token)
 
         if payload is None:
             return fail_message, 401
-            
+
         username = payload.get('username', None)
         user_id = payload.get('id', None)
 
@@ -32,12 +34,13 @@ def check_is_login(message = None):
         user = User.query.filter_by(id=user_id, username=username).first()
         if user is None:
             return fail_message, 401
-        
+
         # store in global context
         g.user = user
-        return {'user': user.to_json(except_keys=['orders'])} ,200
+        return {'user': user.to_json(except_keys=['orders'])}, 200
     except Exception as e:
         return fail_message, 500
+
 
 # decorator
 def login_required(only=[]):
@@ -45,13 +48,15 @@ def login_required(only=[]):
         def wrapper(*args, **kwargs):
             if len(only) == 0 or request.method in only:
                 result = check_is_login("need login")
-                if 200 in result: 
+                if 200 in result:
                     return func(*args, **kwargs)
-                else: 
+                else:
                     return result
             else:
                 return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -72,7 +77,7 @@ def login():
 
         # generate token
         payload = {'username': user.username, 'id': user.id}
-        token = gen_token(payload=payload)
+        token = gen_token(payload=payload, minutes=60)
 
         # update user
         user.logined_at = datetime.datetime.utcnow()
@@ -90,12 +95,23 @@ def is_login():
 @blueprint.route('/register', methods=['POST'])
 @register_validator(only=['POST'])
 def register():
-    try: 
+    try:
         data = request.get_json()
         insert_data = only_keys(data, 'username', 'password')
         user = User(**insert_data)
         db.session.add(user)
         db.session.commit()
         return {'user': user.to_json()}, 200
+    except Exception as e:
+        return {'message': str(e)}, 400
+
+
+@blueprint.route('/check_create/username', methods=['POST'])
+@register_username_validator(only=['POST'])
+def check_username():
+    try:
+        data = request.get_json()
+        checked_username = only_keys(data, 'username')
+        return {'username': checked_username + 'is ok'}, 200
     except Exception as e:
         return {'message': str(e)}, 400

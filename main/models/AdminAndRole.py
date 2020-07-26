@@ -1,8 +1,8 @@
 from main import db
-from main.models import JsonMixin, TimestampMixin
+from main.models import Base
 
 
-class AdminRole(TimestampMixin, db.Model):
+class AdminRole(Base):
     __tablename__ = 'admin_role'
     id = db.Column('id', db.Integer, primary_key=True)
     admin_id = db.Column('admin_id', db.Integer, db.ForeignKey('admins.id'))

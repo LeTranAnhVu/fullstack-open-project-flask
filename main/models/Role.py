@@ -1,8 +1,8 @@
 from main import db, AdminRole, PermissionRole
-from main.models import JsonMixin, TimestampMixin
+from main.models import Base
 
 
-class Role(TimestampMixin, JsonMixin, db.Model):
+class Role(Base):
     __tablename__ = 'roles'
     id = db.Column('id', db.Integer, primary_key=True)
     name = db.Column('name', db.String(50), unique=True, nullable=False)
