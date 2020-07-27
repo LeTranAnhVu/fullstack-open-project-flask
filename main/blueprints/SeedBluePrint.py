@@ -17,24 +17,25 @@ def seed_image():
         try:
             for restaurant in restaurants:
                 restaurant_model = Restaurant.query.filter_by(name=restaurant.get('name')).first()
-                image_url = restaurant.get('image')
-                if restaurant_model and image_url:
-                    print('restaurant', restaurant_model)
-                    local_filename, headers = urllib.request.urlretrieve(image_url)
-                    with ImageUtil.open(local_filename) as image:
-                        # make img name and extension
-                        image_type = headers['Content-Type'].split('/')[-1]
-                        image_name = image_url.split('/')[-1] + '.' + image_type
-                        # save
-                        image.save(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name))
+                if not restaurant_model.images:
+                    image_url = restaurant.get('image')
+                    if restaurant_model and image_url:
+                        print('restaurant', restaurant_model)
+                        local_filename, headers = urllib.request.urlretrieve(image_url)
+                        with ImageUtil.open(local_filename) as image:
+                            # make img name and extension
+                            image_type = headers['Content-Type'].split('/')[-1]
+                            image_name = image_url.split('/')[-1] + '.' + image_type
+                            # save
+                            image.save(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name))
 
-                        # get image relative path
-                        image_link = _make_fileurl(image_name, 'images')
-                        hash = blurhash_maker.encode(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name),
-                                                     x_components=4, y_components=3)
-                        imageModel = Image(name=image_name, blurhash=hash, url=image_link)
-                        image_restaurant = ImageRestaurant(is_main=True, image=imageModel)
-                        restaurant_model.append_image(image_restaurant)
+                            # get image relative path
+                            image_link = _make_fileurl(image_name, 'images')
+                            hash = blurhash_maker.encode(os.path.join(app.config['UPLOAD_FOLDER'], 'images', image_name),
+                                                        x_components=4, y_components=3)
+                            imageModel = Image(name=image_name, blurhash=hash, url=image_link)
+                            image_restaurant = ImageRestaurant(is_main=True, image=imageModel)
+                            restaurant_model.append_image(image_restaurant)
 
             db.session.commit()
             return jsonify({'message': 'seed success'}), 200
@@ -48,15 +49,17 @@ def seed_restaurants():
         restaurants = json.load(file)['restaurants']
         try:
             for restaurant in restaurants:
-                res_model = Restaurant(
-                    city=restaurant.get('city', None),
-                    currency=restaurant.get('currency', None),
-                    delivery_price=restaurant.get('delivery_price', None),
-                    description=restaurant.get('description', None),
-                    name=restaurant.get('name', None),
-                    online=restaurant.get('online', False)
-                )
-                db.session.add(res_model)
+                restaurant_model = Restaurant.query.filter_by(name=restaurant.get('name')).first()
+                if not restaurant_model:
+                    res_model = Restaurant(
+                        city=restaurant.get('city', None),
+                        currency=restaurant.get('currency', None),
+                        delivery_price=restaurant.get('delivery_price', None),
+                        description=restaurant.get('description', None),
+                        name=restaurant.get('name', None),
+                        online=restaurant.get('online', False)
+                    )
+                    db.session.add(res_model)
 
             db.session.commit()
             return jsonify({'message': 'seed success'}), 200
@@ -90,9 +93,11 @@ def seed_tags():
 @blueprint.route('/users')
 def seed_users():
     try:
-        user = User(username='admin', password='admin')
-        db.session.add(user)
-        db.session.commit()
+        user_model = User.query.filter_by(username='admin').first()
+        if not user_model:
+            user = User(username='admin', password='admin')
+            db.session.add(user)
+            db.session.commit()
         return {'message': 'seed success'}
     except Exception as e:
         abort(500, e)
