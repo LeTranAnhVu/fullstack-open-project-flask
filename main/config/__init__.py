@@ -1,6 +1,6 @@
 import os
 from main import app
-from main.settings import SALT, HOST_IP, PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME, DATABASE_HOST
+from main.settings import SALT, HOST_IP, PORT, DATABASE_USER, DATABASE_PASSWORD, DATABASE_NAME, DATABASE_HOST, ENV
 
 class URL_CONFIG:
     PER_PAGE = 10
@@ -19,14 +19,13 @@ class RESOURCE_CONFIG:
 
 class ENV_CONFIG(object):
     SALT = SALT
-    DEBUG = False
-    SQLALCHEMY_ECHO = False
+    DEBUG = False if ENV == 'production' else True
+    SQLALCHEMY_ECHO = False if ENV == 'production' else True
     UPLOAD_FOLDER = os.path.join(app.root_path, RESOURCE_CONFIG.UPLOAD_FOLDER)
     DATETIME_FORMAT = UNIVERSAL.DATETIME_FORMAT
-    SQLALCHEMY_ECHO = True
     HOST_IP = HOST_IP
     PORT = PORT
-    SERVER_NAME = HOST_IP + ":" + PORT
+    # SERVER_NAME = HOST_IP + ":" + PORT
     DATABASE_USER = DATABASE_USER
     DATABASE_PASSWORD = DATABASE_PASSWORD
     DATABASE_NAME = DATABASE_NAME

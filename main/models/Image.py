@@ -24,7 +24,7 @@ class Image(Base):
 
     @property
     def url(self):
-        return 'http://' + app.config["SERVER_NAME"] + '/api/' +self.__url
+        return '/api/' + self.__url
     @url.setter
     def url(self, value):
         self.__url = value
