@@ -1,6 +1,7 @@
 venv
-/main/resources
-/migrations
-/main/config/__init__.py
-__pycache__/
+main/resources
+migrations
+
+**/__pycache__/
+**/*.pyc
 .env
