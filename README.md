@@ -62,7 +62,7 @@ Please check the table hours of every repo to sum up my total working hours for 
     * `flask db downgrade`
   
 ## START SERVER:
-* `gunicorn --bind 0.0.0.0:5000 wsgi:app`
+* `gunicorn --bind 0.0.0.0:5000 --workers=3 --timeout=1200 wsgi:app`
 
 ## SEEDING:
 * seed restaurant: /api/seed/restaurants
