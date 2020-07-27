@@ -44,18 +44,16 @@ Please check the table hours of every repo to sum up my total working hours for 
   * `virtualenv venv`
 * Access env:
   * `source venv/bin/activate`
-* Deaccess env:
-  * (venv) `deactivate`
-* Export package:
-  * (venv) `pip freeze > requirement.txt`
 * Install exist packages:
   * (venv) `pip install -r requirement.txt`
+
+
 ## SETUP & CONFIG DATABASE:
 * Create `.env` from `.env.example`
 
 * Migrate database:
   * `export FLASK_APP="run.py"`
-  * If `main/migrations` folder does not exist. Run `flask db init`
+  * If `migrations` folder does not exist. Run `flask db init`
   * To migrate: 
     * `flask db migrate`
   * To write change to database:
@@ -65,4 +63,14 @@ Please check the table hours of every repo to sum up my total working hours for 
   
 ## START SERVER:
 * `python run.py`
+
+## SEEDING:
+* seed restaurant: /api/seed/restaurants
+* seed user (username: admin, password: admin): /api/seed/users
+  
+## OTHER:
+* Deaccess env:
+  * (venv) `deactivate`
+* Export package:
+  * (venv) `pip freeze > requirement.txt`
 
